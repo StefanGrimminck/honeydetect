@@ -81,13 +81,11 @@ func (h *honeydetect) Run(){
 	boldBlue := blue.Add(color.Bold)
 	_, _ = boldBlue.Printf("Amount of loaded addresses: %v\n", len(addressList))
 
+	sshPositive, sshNegtive := h.checkForSSH(addressList)
+	telnetPositive, telnetNegative := h.checkForTelnet(addressList)
 
-	//Check if server from list is a SSH honeypot
-	sshTotal, sshPositives, sshNegtive := h.checkForSSH(addressList)
-	telnetTotal, telnetPositive, telnetNegative := h.checkForTelnet(addressList)
-
-	color.Green("Scanned devices for SSH: \t%d. SSH Honeypots found: %d, Negatives: %d", sshTotal, sshPositives, sshNegtive)
-	color.Green("Scanned devices for TELNET: \t%d. TELNET Honeypots found: %d, Negatives: %d", telnetTotal, telnetPositive, telnetNegative)
+	color.Green("Scanned devices for SSH: \t%d. SSH Honeypots found: %d, Negatives: %d", sshPositive+sshNegtive, sshPositive, sshNegtive)
+	color.Green("Scanned devices for TELNET: \t%d. TELNET Honeypots found: %d, Negatives: %d", telnetNegative+telnetPositive, telnetPositive, telnetNegative)
 }
 
 // Load configuration from TOML file into Configuration struct

@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"github.com/fatih/color"
 	"net"
 	"strings"
 	"sync"
+	"sync/atomic"
 )
 
-func (h *honeydetect) checkForTelnet(addressList []string) (scanned int, positives int,negatives int) {
+func (h *honeydetect) checkForTelnet(addressList []string) (positives uint64,negatives uint64) {
 	color.Blue("Starting TELNET check...")
 
 	var wg sync.WaitGroup
@@ -21,13 +21,12 @@ func (h *honeydetect) checkForTelnet(addressList []string) (scanned int, positiv
 			// Will authenticate with client "Depth" amount of times.
 			for i := 0; i < h.config.Depth; i++ {
 				if !h.checkTELNET(host) {
-					scanned++
-					negatives++
+					atomic.AddUint64(&negatives, 1)
 					return
 				}
 			}
-			scanned++
-			positives++
+
+			atomic.AddUint64(&positives, 1)
 			color.Yellow("TELNET honeypot found: %s", host)
 		}()
 	}
@@ -51,7 +50,6 @@ func (h *honeydetect)checkTELNET(host string) bool {
 	for {
 		n, err := conn.Read(buf)
 		if err != nil{
-			fmt.Println(err)
 			break
 		}
 		//Check for username prompt. Respond with configured username
